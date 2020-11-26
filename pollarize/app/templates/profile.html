@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1>{{profile.username}}</h1>
+<p>ID: {{profile.id}}</p>
+<p>Email: {{profile.email}}</p>
+<p>Bio: {{profile.bio}}</p>
+<hr>
+<li><a href="{{url_for('update_bio')}}">Update your bio here!</a></li>
+{% endblock %}

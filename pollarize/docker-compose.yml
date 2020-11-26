@@ -1,0 +1,26 @@
+version: '3.6'
+
+services:
+  api:
+    build: .
+    command: python3 app/app.py
+    depends_on:
+      - db
+    ports:
+      - 5000:5000
+    volumes:
+      - ./app:/usr/src/pollarize/app
+    restart: always
+
+  db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    restart: always
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

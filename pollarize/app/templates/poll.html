@@ -1,0 +1,102 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<h1>{{title}}</h1>
+<ul class="list-group">
+    {% for choice in choices %}
+    <li class="list-group-item">
+        {{choice.title}}
+        {% if votes_dict[choice.id] == 0 %}
+        <button type="button" class="btn btn-outline-primary btn-sm" id="upvote" onClick="vote({{choice.id}}, 1)">Upvote</button>
+        <button type="button" class="btn btn-outline-danger btn-sm" id="downvote" onClick="vote({{choice.id}}, -1)">Downvote</button>
+        {% endif %}
+        {% if votes_dict[choice.id] == 1 %}
+        <button type="button" class="btn btn-primary btn-sm" id="upvote" onClick="vote({{choice.id}}, 1)" disabled>Upvote</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="downvote" onClick="vote({{choice.id}}, -1)" disabled>Downvote</button>
+        {% endif %}
+        {% if votes_dict[choice.id] == -1 %}
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="upvote" onClick="vote({{choice.id}}, 1)" disabled>Upvote</button>
+        <button type="button" class="btn btn-danger btn-sm" id="downvote" onClick="vote({{choice.id}}, -1)" disabled>Downvote</button>
+        {% endif %}
+        <span class="badge badge-primary float-right">Rating: {{choice.rating}}</span>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="input-group mt-3">
+    <input type="text" class="form-control" placeholder="Or, type your own option..." id="my-option">
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" id="add-poll">Add</button>
+    </div>
+</div>
+
+<hr>
+
+{% if tags|length > 0 %}
+<h6>Tags for this poll:</h6>
+<ul class="list-group list-group-horizontal">
+    {% for tag in tags %}
+    <li class="list-group-item">
+        {{tag.tag_title}}
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+<hr>
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col-sm">
+            Assign a tag to this poll (click or shift click for multi, then Add Tag):
+            <div class="form-group">
+                {{form.tags(class_="custom-select")}}
+            </div>
+        </div>
+        <div class="col-sm">
+            Or, create a new tag to assign to this poll:
+            <div class="input-group">
+                {{ form.new_tag() }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        {{ form.submit(class_="button") }}
+    </div>
+</form>
+<script>
+$("#add-poll").click(function(e) {
+    e.preventDefault();
+    $.ajax({
+        type: "POST",
+        url: "{{url_for('newchoice', poll_id=poll.poll_id)}}",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({
+            title: $("#my-option").val()
+        }),
+        success: function(result) {
+            location.reload() // haha old-school.
+        },
+        error: function(result) {
+            alert(result.responseText);
+        }
+    });
+})
+function vote(choice_id, value) {
+    var url = "/api/vote/" + choice_id;
+    $.ajax({
+        type: "POST",
+        url: url,
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({
+            value: value
+        }),
+        success: function(result) {
+            location.reload() // haha old-school.
+        },
+        error: function(result) {
+            alert(result.responseText);
+        }
+    });
+}
+</script>
+{% endblock %}
